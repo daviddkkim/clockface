@@ -31,8 +31,10 @@ const isValidRTC3339 = (d: string): boolean => {
     moment(d, 'YYYY-MM-DD HH:mm', true).isValid() ||
     moment(d, 'YYYY-MM-DD HH:mm:ss', true).isValid() ||
     moment(d, 'YYYY-MM-DD HH:mm:ss.SSS', true).isValid() ||
-    moment(d, 'YYYY-MM-DD', true).isValid()
-  )
+    moment(d, 'YYYY-MM-DD', true).isValid()  ||
+    moment(d, 'MM/DD/YYYY h:m A', true).isValid() ||
+    moment(d, 'MM/DD/YYYY h A', true).isValid())  
+
 }
 
 const getFormat = (d: string): string | undefined => {
@@ -47,6 +49,12 @@ const getFormat = (d: string): string | undefined => {
   }
   if (moment(d, 'YYYY-MM-DD HH:mm:ss.SSS', true).isValid()) {
     return 'YYYY-MM-DD HH:mm:ss.SSS'
+  }
+  if (moment(d, 'MM/DD/YYYY h:m a', true).isValid()) {
+    return 'MM/DD/YYYY h:m a'
+  }
+  if (moment(d, 'MM/DD/YYYY h a', true).isValid()) {
+    return 'MM/DD/YYYY h a'
   }
   return
 }
@@ -64,14 +72,21 @@ export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
 
     const formattedInputValue = (): string => {
       if (isInputValueInvalid()) {
+        console.log('invalid');
+
         return inputValue
       }
 
       if (inputFormat) {
-        return moment(dateTime || '').format(inputFormat)
+        console.log('valid');
+        console.log('input Value: ' + inputValue)
+        console.log('input Format: ' + inputFormat)
+        console.log(moment(inputValue, inputFormat).format(inputFormat))
+        return moment(inputValue || '', inputFormat).format(inputFormat)
       }
+      console.log('third');
 
-      return moment(dateTime || '').format('YYYY-MM-DD HH:mm:ss.SSS')
+      return moment(inputValue || '').format('YYYY-MM-DD HH:mm:ss.SSS')
     }
 
     const isInputValueInvalid = (): boolean => {
@@ -119,6 +134,7 @@ export const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
       const value = e.target.value
 
       if (isValidRTC3339(value)) {
+        console.log('valid')
         onSelectDate(moment(value).toISOString())
         setInputValue(value)
         setInputFormat(getFormat(value) || '')
